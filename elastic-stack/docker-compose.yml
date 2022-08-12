@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  elasticsearch:
+    image: "elasticsearch:8.3.3"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - network.host=0.0.0.0
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - ELASTIC_PASSWORD=elastic
+      # Used to avoid huge memory consumption by Elasticsearch.
+      # Otherwise, you need to extend the Docker limits
+      # to avoid continuous container crashes due to lack of memory.
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  logstash:
+    image: "logstash:8.3.3"
+    ports:
+      - "9600:9600"
+    environment:
+      - ELASTIC_PASSWORD=elastic
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: "elastic/filebeat:8.3.3"
+    environment:
+      - ELASTIC_PASSWORD=elastic
+    volumes:
+      - ../logs:/logs
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: "kibana:8.3.3"
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTIC_PASSWORD=elastic
+    depends_on:
+    - elasticsearch

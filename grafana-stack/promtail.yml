@@ -1,0 +1,12 @@
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: pulpolog
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: pulpolog
+          __path__: /tmp/log/*.log
+

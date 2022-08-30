@@ -1,0 +1,99 @@
+version: '3.7'
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+
+services:
+  node-exporter:
+    image: prom/node-exporter:v1.3.1
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    expose:
+      - 9100
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring
+#    cap_add:
+#      - SYS_TIME
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.45.0
+    labels:
+      - "prometheus-job=cadvisor"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring
+    restart: always
+    devices:
+      - /dev/kmsg:/dev/kmsg
+
+  prometheus:
+    image: prom/prometheus:v2.38.0
+#    user: root
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    expose:
+      - 9090
+    ports:
+      - "9090:9090"
+    links:
+      - alertmanager:alertmanager
+    networks:
+      - monitoring
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
+
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    networks:
+      - monitoring
+    restart: always
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+
+  grafana:
+    image: "grafana/grafana:9.1.1"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    env_file:
+      - grafana/grafana.env
+    networks:
+      - monitoring
+    restart: always

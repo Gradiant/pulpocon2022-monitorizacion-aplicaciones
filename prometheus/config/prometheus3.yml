@@ -1,0 +1,48 @@
+# my global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'my-project'
+
+ # Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  - '/etc/prometheus/alert_rules.yml'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+           - alertmanager:9093
+
+scrape_configs:
+  # Make Prometheus scrape itself for metrics.
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Node exporter
+  - job_name: "node"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # cadvisor
+  - job_name: 'cadvisor'
+    scrape_interval: 1s
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # Docker daemon.
+  #
+  # This example requires Docker daemon to be configured to expose
+  # Prometheus metrics, as documented here:
+  # https://docs.docker.com/config/daemon/prometheus/
+  - job_name: "docker"
+    scrape_interval: 1s
+    static_configs:
+      - targets: ["host.docker.internal:9323"]

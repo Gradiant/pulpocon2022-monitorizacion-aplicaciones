@@ -1,4 +1,8 @@
-version: "3.9"
+version: "3.7"
+
+networks:
+  monitoring:
+    driver: bridge
 
 services:
   elasticsearch:
@@ -20,6 +24,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    networks:
+      - monitoring
 
   logstash:
     image: "logstash:8.3.3"
@@ -31,6 +37,8 @@ services:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     depends_on:
       - elasticsearch
+    networks:
+      - monitoring
 
   filebeat:
     image: "elastic/filebeat:8.3.3"
@@ -41,6 +49,8 @@ services:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
     depends_on:
       - elasticsearch
+    networks:
+      - monitoring
 
   kibana:
     image: "kibana:8.3.3"
@@ -50,3 +60,21 @@ services:
       - ELASTIC_PASSWORD=elastic
     depends_on:
     - elasticsearch
+    networks:
+      - monitoring
+
+  log-generator:
+    image: mingrammer/flog
+    command:
+      - --loop
+      - --format=apache_combined
+#      - --format=json
+      - --number=10    # number of log lines to generate per second
+      - --delay=100ms  # delay between log lines
+      - --type=stdout
+    logging:
+      driver: elastic
+      options:
+        hosts: "http://0.0.0.0:9200"
+    networks:
+      - monitoring

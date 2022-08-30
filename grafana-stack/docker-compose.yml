@@ -1,19 +1,52 @@
-version: "3.9"
+version: "3.7"
+
+networks:
+  monitoring:
+    driver: bridge
 
 services:
   grafana:
-    image: "grafana/grafana:8.5.10"
+    image: "grafana/grafana:9.1.1"
     ports:
       - "3000:3000"
+    env_file:
+      - grafana/grafana.env
+    networks:
+      - monitoring
 
   loki:
     image: "grafana/loki:2.6.1"
     ports:
       - "3100:3100"
+    networks:
+      - monitoring
 
   promtail:
     image: "grafana/promtail:2.6.1"
     volumes:
       - ../logs:/tmp/log
-      - ./promtail.yml:/etc/promtail/config.yaml
+      - /var/log:/var/log:ro-id:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/promtail.yml:/etc/promtail/config.yaml
     command: -config.file=/etc/promtail/config.yaml
+    ports:
+      - "9080:9080"
+    networks:
+      - monitoring
+
+  log-generator:
+    image: mingrammer/flog
+    command:
+      - --loop
+      - --format=apache_combined
+#      - --format=json
+      - --number=10    # number of log lines to generate per second
+      - --delay=100ms  # delay between log lines
+      - --type=stdout
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://0.0.0.0:3100/loki/api/v1/push"
+        loki-external-labels: job=dockerlokilogs
+    networks:
+      - monitoring

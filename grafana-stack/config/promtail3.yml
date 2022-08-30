@@ -1,0 +1,44 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: pulpolog
+    static_configs:
+      - targets: # tells promtail to look for the logs on the current machine/host
+          - localhost
+        labels:
+          job: pulpolog
+          __path__: /tmp/log/*.log
+
+  - job_name: dockerlogs
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 1s
+        filters:
+          - name: network
+            values: [pulpocon_monitoring]
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_network_name']
+        regex: '/(.*)'
+        target_label: 'container_net'
+    pipeline_stages:
+      - docker: {}
+      - static_labels:
+          job: dockerlogs
+
+  - job_name: journal
+    journal:
+      max_age: 4h
+      labels:
+        job: systemd-journal
+      path: /var/log/journal
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'systemd_unit'

@@ -17,7 +17,8 @@ docker compose -p pulpocon up -d
 ```
 
 Si se tiene compose V1 (el clásico script Python) en lugar del plugin de compose V2 las instrucciones serán con 
-docker-compose en lugar de docker compose.
+docker-compose en lugar de docker compose. Y los nombres de los contenedores llevarán _ en lugar de - (i.e. 
+pulpocon_prometheus_1).
 
 *Ejercicios paso a paso*
 
@@ -129,11 +130,10 @@ En http://localhost:8080/containers/ se puede navegar por los contenedores y ver
 
 #### Prometheus
 
-Es necesario añadir a la configuración de Prometheus la tarea de scrapeo de este servicio. Fichero config/prometheus2.
-yaml
+Es necesario añadir a la configuración de Prometheus la tarea de scrapeo de este servicio. Fichero config/prometheus2.yaml
 
 ```bash
-docker restart pulpocon_prometheus_1
+docker restart pulpocon-prometheus-1
 ```
 
 #### Grafana
@@ -141,7 +141,7 @@ docker restart pulpocon_prometheus_1
 Explorar:
 
 ```promql
-irate(container_cpu_usage_seconds_total{name="pulpocon_node-exporter_1"}[1m])
+irate(container_cpu_usage_seconds_total{name="pulpocon-node-exporter-1"}[1m])
 ```
 Tip: Legend {{name}}-{{cpu}}
 
@@ -172,9 +172,9 @@ Comprueba las métricas en http://172.17.0.1:9323/metrics
 
 En la configuración de prometheus se debe añadir un job de docker que debe tener como target la <ip del 
 host>:9323. Fichero config/prometheus3.yaml
-Es necesario modificar el despliegue para incluir privilegios y el sock de docker en el servicio de Prometheus. 
+Es necesario modificar el despliegue para incluir privilegios (user root) en el servicio de Prometheus. 
 Además se añade el host de docker para facilitar la resolución de su IP (Esto funciona automáticamente en el 
-despliegue para Docker < 20.10 en linux usando el compose proporcionado y descomentando extra_hosts)
+despliegue para Docker > 20.10 en linux usando el compose proporcionado y descomentando extra_hosts)
 
 Ejemplo de métricas añadidas:
 ```promql

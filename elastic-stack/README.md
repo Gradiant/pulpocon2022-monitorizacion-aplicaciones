@@ -6,11 +6,14 @@
 # Lanzamos Kibana
 docker-compose up -d kibana
 
-# Lanzamos Loki
-docker-compose up -d loki
+# Lanzamos ElasticSearch
+docker-compose up -d elasticsearch
 
-# Lanzamos Promtail
-docker-compose up -d promtail
+# Lanzamos Logstash
+docker-compose up -d logstash
+
+# Lanzamos Filebeat
+docker-compose up -d filebeat
 ```
 
 Tip: Si quieres puedes lanzar todo de una sola vez, pero queríamos alagar el taller :wink:

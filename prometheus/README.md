@@ -31,7 +31,6 @@ pulpocon_prometheus_1).
 Emite alertas según las reglas configuradas en Prometheus.
 
 ```bash
-cd prometheus
 docker compose -p pulpocon up -d alertmanager
 ```
 
@@ -45,7 +44,6 @@ Comprueba la interfaz disponible en http://localhost:9093/
 Exporta métricas de la máquina para que se pueden scrapear. Las deja disponibles en http://localhost:9100/metrics
 
 ```bash
-cd prometheus
 docker compose -p pulpocon up -d node-exporter
 ```
 
@@ -57,11 +55,10 @@ En algunos sistemas puede ser necesario añadir SYS_TIME para recolectar tiempos
 
 [prometheus](https://prometheus.io/)
 
-    - Interfaz disponible en http://localhost:9090/
-    - Métricas en http://localhost:9090/metrics
+- Interfaz disponible en http://localhost:9090/
+- Métricas en http://localhost:9090/metrics
 
 ```bash
-cd prometheus
 docker compose -p pulpocon up -d prometheus
 ```
 
@@ -91,7 +88,6 @@ Prometheus expression browser: http://localhost:9090/
 #### Visualización Grafana
 
 ```bash
-cd grafana
 docker compose -p pulpocon up -d grafana
 ```
 
@@ -122,7 +118,6 @@ Por último se pueden usar dashboards. Lo más cómodo es importarlos desde graf
 Recoge métricas de los contenedores docker. Disponibles en http://localhost:8080/metrics
 
 ```bash
-cd prometheus
 docker compose -p pulpocon up -d cadvisor
 ```
 

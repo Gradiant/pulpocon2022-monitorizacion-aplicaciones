@@ -50,7 +50,6 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.38.0
-#    user: root
     restart: unless-stopped
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml

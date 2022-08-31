@@ -167,9 +167,8 @@ Comprueba las métricas en http://172.17.0.1:9323/metrics
 
 En la configuración de prometheus se debe añadir un job de docker que debe tener como target la <ip del 
 host>:9323. Fichero config/prometheus3.yaml
-Es necesario modificar el despliegue para incluir privilegios (user root) en el servicio de Prometheus. 
-Además se añade el host de docker para facilitar la resolución de su IP (Esto funciona automáticamente en el 
-despliegue para Docker > 20.10 en linux usando el compose proporcionado y descomentando extra_hosts)
+Es necesario modificar el despliegue para añadir el host de docker, para facilitar la resolución de su IP (Esto 
+funciona automáticamente en el despliegue para Docker > 20.10 en linux usando el compose proporcionado y descomentando extra_hosts)
 
 Ejemplo de métricas añadidas:
 ```promql

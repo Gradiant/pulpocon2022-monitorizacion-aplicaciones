@@ -25,8 +25,8 @@ services:
     image: "grafana/promtail:2.6.1"
     volumes:
       - ../logs:/tmp/log
-      - /var/log:/var/log:ro-id:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+#      - /var/log:/var/log:ro
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./config/promtail.yml:/etc/promtail/config.yaml
     command: -config.file=/etc/promtail/config.yaml
     ports:

@@ -10,7 +10,7 @@ volumes:
 
 services:
   node-exporter:
-    image: prom/node-exporter:v1.3.1
+    image: "prom/node-exporter:v1.3.1"
     restart: unless-stopped
     volumes:
       - /proc:/host/proc:ro
@@ -31,7 +31,7 @@ services:
 #      - SYS_TIME
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.45.0
+    image: "gcr.io/cadvisor/cadvisor:v0.45.0"
     labels:
       - "prometheus-job=cadvisor"
     volumes:
@@ -49,11 +49,12 @@ services:
       - /dev/kmsg:/dev/kmsg
 
   prometheus:
-    image: prom/prometheus:v2.38.0
+    image: "prom/prometheus:v2.38.0"
     restart: unless-stopped
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./config/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - ./config/record_rules.yml:/etc/prometheus/record_rules.yml
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -73,7 +74,7 @@ services:
 #      - "host.docker.internal:host-gateway"
 
   alertmanager:
-    image: prom/alertmanager:v0.24.0
+    image: "prom/alertmanager:v0.24.0"
     ports:
       - "9093:9093"
     volumes:

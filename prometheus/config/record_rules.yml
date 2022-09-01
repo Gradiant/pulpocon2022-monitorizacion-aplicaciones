@@ -1,0 +1,9 @@
+groups:
+  - name: recording_rules
+    interval: 5s
+    rules:
+      - record: node_filesystem_free_percents
+        expr: 100 - 100 * ( node_filesystem_free_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} )
+
+      - record: node_memory_free_percents
+        expr: 100 - 100 * (node_memory_MemFree_bytes / node_memory_MemTotal_bytes)

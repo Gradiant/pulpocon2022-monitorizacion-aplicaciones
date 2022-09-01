@@ -35,7 +35,7 @@ services:
       - monitoring
 
   log-generator:
-    image: mingrammer/flog
+    image: "mingrammer/flog:0.4.3"
     command:
       - --loop
       - --format=apache_combined

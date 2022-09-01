@@ -1,2 +1,4 @@
 **.log
+!Apache_2k.log
 prometheus.yaml
+promtail.yml
